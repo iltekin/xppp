@@ -1,112 +1,100 @@
-import React, { useState, useRef } from 'react';
-import { PreviewImageState, UserProfile } from '../types';
-import { processImageFile } from '../utils/imageProcessor';
-import { OverlayModal } from '../components/Modal/OverlayModal';
+import React, { useState, useEffect } from 'react';
+import { StoredAvatarPreview } from '../types';
+import { loadAvatarPreview, clearAvatarPreview } from '../utils/storage';
+import { CropModal } from '../components/Modal/CropModal';
 
 export const Popup: React.FC = () => {
-  const [selectedImage, setSelectedImage] = useState<PreviewImageState | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [activePreview, setActivePreview] = useState<StoredAvatarPreview | null>(null);
+  const [isCropModalOpen, setIsCropModalOpen] = useState(false);
 
-  const defaultUser: UserProfile = {
-    displayName: 'Preview User',
-    username: 'preview_user',
-    avatarUrl: null,
-    bio: 'Previewing profile pictures realistically across X before saving.',
-    location: 'San Francisco, CA',
-    website: 'https://x.com',
-    joinedDate: 'Joined September 2021',
-    followingCount: '342',
-    followersCount: '8.9K',
-    isVerified: true,
-    bannerUrl: null,
-  };
-
-  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    try {
-      const state = await processImageFile(file);
-      setSelectedImage(state);
-      setIsModalOpen(true);
-    } catch (err: any) {
-      alert(err.message || 'Error loading image');
-    }
-  };
+  useEffect(() => {
+    loadAvatarPreview().then((saved) => {
+      setActivePreview(saved);
+    });
+  }, []);
 
   const openXProfile = () => {
     chrome.tabs.create({ url: 'https://x.com' });
   };
 
+  const handleRemove = async () => {
+    await clearAvatarPreview();
+    setActivePreview(null);
+  };
+
   return (
     <div className="w-[360px] p-5 font-chirp bg-black text-[#e7e9ea] select-none">
-      <input
-        type="file"
-        ref={fileInputRef}
-        onChange={handleFile}
-        accept="image/*"
-        className="hidden"
-      />
-
       {/* Header */}
       <div className="flex items-center space-x-3 mb-4">
-        <div className="w-9 h-9 rounded-full bg-xblue flex items-center justify-center text-white font-bold shadow-md">
-          <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5">
-            <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
-            <circle cx="12" cy="12" r="3" />
-          </svg>
-        </div>
+        <img
+          src="/icons/icon48.png"
+          alt="X Profile Picture Preview"
+          className="w-9 h-9 rounded-xl shadow-md object-contain"
+        />
         <div>
           <h1 className="text-base font-bold tracking-tight">X Profile Picture Preview</h1>
-          <p className="text-xs text-neutral-400">Realistic multi-context preview on X</p>
+          <p className="text-xs text-[#1d9bf0] font-medium">Preview without losing your Blue Checkmark</p>
         </div>
       </div>
 
-      {/* Description Card */}
-      <div className="p-3.5 rounded-2xl bg-neutral-900 border border-neutral-800 space-y-2 mb-4 text-xs">
-        <div className="flex items-start space-x-2 text-neutral-300">
-          <svg viewBox="0 0 24 24" className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-          </svg>
-          <span>
-            Prevents losing your blue verification badge accidentally by letting you preview your new photo across all X contexts first.
-          </span>
-        </div>
-      </div>
+      {/* Active Preview Status Card */}
+      {activePreview?.enabled && activePreview.dataUrl ? (
+        <div className="p-3.5 rounded-2xl bg-emerald-950/40 border border-emerald-500/30 space-y-3 mb-4 text-xs">
+          <div className="flex items-center space-x-3">
+            <div className="w-11 h-11 rounded-full overflow-hidden border-2 border-emerald-400 shadow flex-shrink-0">
+              <img src={activePreview.dataUrl} alt="Active preview" className="w-full h-full object-cover" />
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center space-x-1.5 text-emerald-400 font-bold">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span>Preview Active</span>
+              </div>
+              <p className="text-[11px] text-neutral-300 mt-0.5">
+                Your profile pictures across X are replaced with this preview.
+              </p>
+            </div>
+          </div>
 
-      {/* Features list */}
-      <div className="text-xs text-neutral-400 space-y-1.5 mb-5 pl-1">
-        <div className="flex items-center space-x-2">
-          <span className="w-1.5 h-1.5 rounded-full bg-xblue" />
-          <span>Profile (134px avatar & banner)</span>
+          <div className="flex items-center space-x-2 pt-1 border-t border-emerald-500/20">
+            <button
+              type="button"
+              onClick={() => setIsCropModalOpen(true)}
+              className="flex-1 py-1.5 px-3 rounded-full bg-neutral-800 hover:bg-neutral-700 text-white font-semibold text-[11px] transition-colors"
+            >
+              Edit
+            </button>
+            <button
+              type="button"
+              onClick={handleRemove}
+              className="py-1.5 px-3 rounded-full text-red-400 hover:bg-red-500/10 border border-red-500/20 font-semibold text-[11px] transition-colors"
+            >
+              Remove
+            </button>
+          </div>
         </div>
-        <div className="flex items-center space-x-2">
-          <span className="w-1.5 h-1.5 rounded-full bg-xblue" />
-          <span>Timeline Post (40px avatar)</span>
+      ) : (
+        <div className="p-3.5 rounded-2xl bg-neutral-900 border border-neutral-800 space-y-2 mb-4 text-xs">
+          <p className="text-neutral-300">
+            Test new avatars in realistic contexts across X <strong>without triggering review or risking losing your Blue Checkmark</strong>.
+          </p>
+          <p className="text-[11px] text-neutral-400">
+            Find the <strong>Profile Picture Preview</strong> button on your profile, or adjust directly from here:
+          </p>
         </div>
-        <div className="flex items-center space-x-2">
-          <span className="w-1.5 h-1.5 rounded-full bg-xblue" />
-          <span>Thread Reply (40px connected)</span>
-        </div>
-        <div className="flex items-center space-x-2">
-          <span className="w-1.5 h-1.5 rounded-full bg-xblue" />
-          <span>Search Results & Notifications</span>
-        </div>
-      </div>
+      )}
 
       {/* Action Buttons */}
       <div className="space-y-2">
         <button
           type="button"
-          onClick={() => fileInputRef.current?.click()}
-          className="w-full py-2.5 px-4 rounded-full bg-xblue hover:bg-xblue-hover text-white text-xs font-bold transition-all flex items-center justify-center space-x-2 shadow-lg"
+          onClick={() => setIsCropModalOpen(true)}
+          className="w-full py-2.5 px-4 rounded-full bg-[#1d9bf0] hover:bg-[#1a8cd8] text-white text-xs font-bold transition-all flex items-center justify-center space-x-2 shadow-lg"
         >
           <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2">
-            <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
-            <circle cx="9" cy="9" r="2" />
-            <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+            <circle cx="12" cy="13" r="4"/>
           </svg>
-          <span>Choose Image to Preview</span>
+          <span>Select & Adjust Photo (Resize / Pan)</span>
         </button>
 
         <button
@@ -114,7 +102,7 @@ export const Popup: React.FC = () => {
           onClick={openXProfile}
           className="w-full py-2 px-4 rounded-full bg-neutral-900 hover:bg-neutral-800 text-neutral-300 hover:text-white border border-neutral-700 text-xs font-semibold transition-colors flex items-center justify-center space-x-1.5"
         >
-          <span>Open X (x.com)</span>
+          <span>Go to X (x.com)</span>
           <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
             <polyline points="15 3 21 3 21 9" />
@@ -123,19 +111,38 @@ export const Popup: React.FC = () => {
         </button>
       </div>
 
-      {/* Footer info */}
-      <p className="mt-4 text-[10px] text-neutral-500 text-center">
-        100% Client-side • Zero uploads • Offline ready
-      </p>
+      <div className="mt-4 pt-3 border-t border-neutral-800 text-center space-y-1">
+        <p className="text-[10px] text-neutral-500">
+          100% Client-Side • Never uploaded to any server • Safe
+        </p>
+        <p className="text-[11px] text-neutral-400">
+          Created by{' '}
+          <a
+            href="https://x.com/sezeriltekin"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[#1d9bf0] font-semibold hover:underline"
+          >
+            @sezeriltekin
+          </a>
+        </p>
+      </div>
 
-      {/* Modal Preview when activated */}
-      {isModalOpen && selectedImage && (
-        <OverlayModal
-          imageState={selectedImage}
-          user={defaultUser}
-          initialTheme="dark"
-          onClose={() => setIsModalOpen(false)}
-          onImageChange={(newImg) => setSelectedImage(newImg)}
+      {/* Crop Modal when open */}
+      {isCropModalOpen && (
+        <CropModal
+          initialPreview={activePreview}
+          currentTheme="dark"
+          userHandle={activePreview?.userHandle || null}
+          onClose={() => setIsCropModalOpen(false)}
+          onApplied={(applied) => {
+            setActivePreview(applied);
+            setIsCropModalOpen(false);
+          }}
+          onReset={() => {
+            setActivePreview(null);
+            setIsCropModalOpen(false);
+          }}
         />
       )}
     </div>

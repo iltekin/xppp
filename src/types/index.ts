@@ -23,3 +23,21 @@ export interface PreviewImageState {
   width?: number;
   height?: number;
 }
+
+export interface CropTransform {
+  scale: number;
+  x: number;
+  y: number;
+  rotation: number;
+}
+
+export interface StoredAvatarPreview {
+  dataUrl: string;
+  originalRawUrl?: string;
+  updatedAt: number;
+  enabled: boolean;
+  userHandle?: string;
+  userAvatarSignature?: string;
+  originalAvatarUrl?: string;
+  transform?: CropTransform;
+}

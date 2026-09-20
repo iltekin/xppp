@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build && vite build --config vite.content.config.ts",
+    "package": "npm run build && rm -f x-profile-picture-preview-v1.0.0.zip && (cd dist && zip -r ../x-profile-picture-preview-v1.0.0.zip . -x \"*.DS_Store\")",
     "preview": "vite preview"
   },
   "dependencies": {

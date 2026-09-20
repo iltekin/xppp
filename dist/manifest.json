@@ -2,17 +2,22 @@
   "manifest_version": 3,
   "name": "X Profile Picture Preview",
   "version": "1.0.0",
-  "description": "Preview your new profile picture across realistic X interface contexts before saving it.",
+  "description": "Preview new profile pictures on X without changing your avatar or risking losing your Blue Checkmark.",
   "icons": {
     "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
   },
+  "permissions": [
+    "storage"
+  ],
   "action": {
     "default_popup": "index.html",
     "default_title": "X Profile Picture Preview",
     "default_icon": {
       "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
       "48": "icons/icon48.png",
       "128": "icons/icon128.png"
     }

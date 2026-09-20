@@ -1,6 +1,14 @@
 # X Profile Picture Preview
 
-A Chrome Extension (Manifest V3) that allows users on X (formerly Twitter) to preview how a newly selected profile picture looks across realistic X interface contexts before saving it.
+A Chrome Extension (Manifest V3) that allows users on X (formerly Twitter) to preview how a newly selected profile picture looks across realistic X interface contexts before saving it—keeping your Blue Checkmark safe.
+
+<p align="center">
+  <img src="store_assets/xppp-promo.jpg" alt="X Profile Picture Preview Promo" width="700" />
+</p>
+
+<p align="center">
+  <img src="store_assets/xppp-ss.jpg" alt="X Profile Picture Preview Modal" width="700" />
+</p>
 
 ---
 
