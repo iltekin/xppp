@@ -1,0 +1,33 @@
+{
+  "manifest_version": 3,
+  "name": "X Profile Picture Preview",
+  "version": "1.0.0",
+  "description": "Preview your new profile picture across realistic X interface contexts before saving it.",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_popup": "index.html",
+    "default_title": "X Profile Picture Preview",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://x.com/*", "https://twitter.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["icons/*"],
+      "matches": ["https://x.com/*", "https://twitter.com/*"]
+    }
+  ]
+}
